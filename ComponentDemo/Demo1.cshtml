@@ -1,0 +1,42 @@
+﻿@{
+    Layout = "_Layout.cshtml"; 
+}
+
+<div ng-app="myApp" ng-controller="myCtrl" data-pagelimit="limit1">
+    <div class="form-group form-inline">
+        <input type="text" class="form-control" ng-model="myinput" />
+        <button type="button" class="btn btn-primary" ng-limit="limit1" ng-click="testClick()">this need limit1</button>
+    </div>
+    <div class="form-group form-inline">
+        <a ng-href="{{printurl}}">Print</a>
+    </div>
+</div>
+
+@section styles{
+    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="Stylesheet" />
+    <link href="//cdn.bootcss.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="Stylesheet" />
+}
+
+@section scripts{
+    <script src="//cdn.bootcss.com/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js" type="text/javascript"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="//cdn.bootcss.com/angular.js/1.4.7/angular.min.js"></script>
+
+    <script>
+        var app = angular.module('myApp', []);
+
+        app.controller('myCtrl', function ($scope, $http, $window) {
+            $scope.testClick = function () {
+                $http.post('/service/demo/componentdemo/mybiz/mybizmethod1', { myinput: $scope.myinput }).success(function (data) {
+                    if (data.message == 'ok') {
+                        $scope.myinput = data.result;
+                        $scope.printurl = '/print/printpage?category=saleorder&modelid='+data.modelid;
+                    }
+                });
+            };
+        });
+
+
+    </script>
+}

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<languages>
+  <zh-CN>
+    <string name="多语言测试" value="多语言测试"></string>
+  </zh-CN>
+  <en-US>
+    <string name="多语言测试" value="multi language test"></string>
+  </en-US>
+</languages>

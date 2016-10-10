@@ -10,6 +10,10 @@ namespace Rings.Models
         public static bool IsAllowed(this Account account, string limitname)
         {
             //todo:check limit
+            if (account.UserName.ToLower() == "admin")
+            {
+                return true;
+            }
             return false;
         }
     }

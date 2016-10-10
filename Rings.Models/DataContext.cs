@@ -32,7 +32,6 @@ namespace Rings.Models
         }
 
         public string ConnectionString { get { return this.connectionstring; } }
-
-
+         
     }
 }

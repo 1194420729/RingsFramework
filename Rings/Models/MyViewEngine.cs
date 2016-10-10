@@ -8,6 +8,9 @@ namespace Rings.Models
 {
     public class MyViewEngine : RazorViewEngine
     {
+        private string viewPath = null;
+        private string partialPath = null;
+
         public MyViewEngine()
         {
 
@@ -73,5 +76,21 @@ namespace Rings.Models
             return base.FindView(controllerContext, viewName, masterName, useCache);
         }
 
+        protected override IView CreatePartialView(ControllerContext controllerContext, string partialPath)
+        {
+            this.partialPath = partialPath;
+
+            return base.CreatePartialView(controllerContext, partialPath);
+        }
+
+        protected override IView CreateView(ControllerContext controllerContext, string viewPath, string masterPath)
+        {
+            this.viewPath = viewPath;
+
+            return base.CreateView(controllerContext,viewPath,masterPath);
+        }
+
+        public string ViewPath { get { return this.viewPath; } }
+        public string PartialPath { get { return this.partialPath; } }
     }
 }

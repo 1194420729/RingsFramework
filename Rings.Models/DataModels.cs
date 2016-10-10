@@ -66,4 +66,5 @@ namespace Rings.Models
         public string Path { get; set; }
         public string Html { get; set; }
     }
+     
 }

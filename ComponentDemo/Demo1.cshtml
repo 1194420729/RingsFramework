@@ -28,7 +28,7 @@
 
         app.controller('myCtrl', function ($scope, $http, $window) {
             $scope.testClick = function () {
-                $http.post('/service/demo/componentdemo/mybiz/mybizmethod1', { myinput: $scope.myinput }).success(function (data) {
+                $http.post('/demoservice/mybizmethod1', { myinput: $scope.myinput }).success(function (data) {
                     if (data.message == 'ok') {
                         $scope.myinput = data.result;
                         $scope.printurl = '/print/printpage?category=saleorder&modelid='+data.modelid;

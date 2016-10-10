@@ -69,7 +69,7 @@ namespace Rings.Controllers
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.Connection = connection;
 
-                command.CommandText = "select id,content->>'username' as username,content->>'password' as password,content->>'name' as name from \"user\" where content->>'username'=@username";
+                command.CommandText = "select id,content->>'username' as username,content->>'password' as password,content->>'name' as name from \"employee\" where content->>'username'=@username";
                 command.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Text).Value = username;
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
                 da.Fill(dt);

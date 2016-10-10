@@ -8,6 +8,7 @@ using System.Text;
 using System.Web.UI;
 using System.Text.RegularExpressions;
 using CsQuery;
+using System.Xml;
 
 namespace Rings.Models
 {
@@ -32,7 +33,7 @@ namespace Rings.Models
                 result = FindView(context);
                 View = result.View;
             }
-
+            
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
             HtmlTextWriter tw = new HtmlTextWriter(sw);
@@ -65,14 +66,37 @@ namespace Rings.Models
                 #endregion
             }
 
+            #region 移除没有权限的元素
             string pattern = "ng-limit=\".*?\"";
             this.context = context;
             s = Regex.Replace(s, pattern, new MatchEvaluator(OutPutMatch));
 
             CQ cq = CQ.CreateDocument(s);
-            CQ cq2 = cq.Select("[ng-limit='false']").Remove(); 
+            CQ cq2 = cq.Select("[ng-limit='false']").Remove();
             string newhtml = cq2.Render();
+            #endregion
 
+            #region 替换service的短链接
+            string viewpath=(result.ViewEngine as MyViewEngine).ViewPath;
+            string viewfilepath=context.HttpContext.Server.MapPath(viewpath);
+            string viewdirectorypath = new FileInfo(viewfilepath).Directory.FullName;
+            string shortconfigpath = Path.Combine(viewdirectorypath,"short.config.xml");
+            if (File.Exists(shortconfigpath))
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(shortconfigpath);
+
+                XmlNodeList nodes= doc.DocumentElement.SelectNodes("/shorts/short");
+                foreach (XmlNode node in nodes)
+                {
+                    string shortname = node.Attributes["name"].Value;
+                    string shortpath = node.Attributes["path"].Value;
+                    newhtml = newhtml.Replace(shortname,shortpath);
+                }
+            }
+
+            #endregion
+             
             writer.Write(newhtml);
              
             if (result != null)

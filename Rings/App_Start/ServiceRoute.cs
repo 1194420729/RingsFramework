@@ -28,6 +28,12 @@ namespace Rings
                 return null;
             }
 
+            //上传文件，不处理
+            if (ss.Length > 0 && ss[0].ToLower() == "upload")
+            {
+                return null;
+            }
+
             //数据接口，全部转到ServiceFactory
             if (ss.Length > 0 && ss[0].ToLower() == "service")
             { 

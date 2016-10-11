@@ -89,7 +89,7 @@ namespace Rings.Models
     public class PluginContext
     {
         public Account Account { get; set; }
-
+         
         public static PluginContext Current { get; set; }
     }
 }

@@ -34,6 +34,12 @@ namespace Rings
                 return null;
             }
 
+            //httpcontext服务，不处理
+            if (ss.Length > 0 && ss[0].ToLower() == "contextservice")
+            {
+                return null;
+            }
+
             //数据接口，全部转到ServiceFactory
             if (ss.Length > 0 && ss[0].ToLower() == "service")
             { 

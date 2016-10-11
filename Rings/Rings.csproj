@@ -142,6 +142,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AllowedIPOnlyAttribute .cs" />
     <Compile Include="Models\MyHelper.cs" />
     <Compile Include="Models\MyJsonResult.cs" />
     <Compile Include="Models\MyPartialViewResult.cs" />

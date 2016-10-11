@@ -15,6 +15,8 @@ namespace Rings.Controllers
             var account = User.Identity.GetAccount();
 
             var virtualPath = Request.Path;//获取虚拟路径
+             
+            ViewBag.QueryString = Request.QueryString;
 
             string[] ss = virtualPath.Split(new char[]{'/'},StringSplitOptions.RemoveEmptyEntries);
             if (ss.Length==0)

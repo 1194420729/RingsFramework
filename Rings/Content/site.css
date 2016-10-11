@@ -3,10 +3,10 @@
     padding: 0;
     margin: 0;
 }
-nav:not(.mm-menu)
+/*nav:not(.mm-menu)
 {
     display: none;
-}
+}*/
 .pageheader
 {
     text-align: center;

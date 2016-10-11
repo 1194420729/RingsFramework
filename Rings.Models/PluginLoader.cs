@@ -10,11 +10,12 @@ namespace Rings.Models
 {
     public class PluginLoader : MarshalByRefObject
     { 
-        public string Run(string assemblypath, string classname, string methodname, string parameters, Account account)
+        public string Run(string assemblypath, string classname, string methodname, string parameters, Account account,string contextserviceurl)
         {
             PluginContext.Current = new PluginContext()
             {
-                Account = account
+                Account = account,
+                ContextServiceUrl=contextserviceurl
             };
 
             string accountname = account.Name;
@@ -89,7 +90,8 @@ namespace Rings.Models
     public class PluginContext
     {
         public Account Account { get; set; }
-         
+        public string ContextServiceUrl { get;set;}
+        
         public static PluginContext Current { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using Rings.Models;
 using System.Reflection;
 using System.Text;
 using System.Runtime.Remoting.Lifetime;
+using System.Configuration;
 
 namespace Rings.Controllers
 {
@@ -61,6 +62,9 @@ namespace Rings.Controllers
                 return Json(new { message="服务不存在！"});
             }
 
+            AppSettingsReader reader = new AppSettingsReader();
+            string contextserviceurl = reader.GetValue("contextservice",typeof(string)).ToString();
+
             //通过反射调用服务 
             AppDomainSetup setup = new AppDomainSetup();
             setup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -68,13 +72,13 @@ namespace Rings.Controllers
             setup.LoaderOptimization = LoaderOptimization.MultiDomain;
             setup.ConfigurationFile = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
             setup.ApplicationTrust = AppDomain.CurrentDomain.SetupInformation.ApplicationTrust;
-
+            
             AppDomain domain=AppDomain.CreateDomain(Guid.NewGuid().ToString(),null,setup);
             PluginLoader loader= domain.CreateInstanceAndUnwrap(typeof(PluginLoader).Assembly.FullName, typeof(PluginLoader).FullName) as PluginLoader;
             string resultjson = "";
             try
             {
-                resultjson = loader.Run(dllpath, classname, methodname, parameters, account);
+                resultjson = loader.Run(dllpath, classname, methodname, parameters, account, contextserviceurl);
             }
             catch (Exception ex)
             {

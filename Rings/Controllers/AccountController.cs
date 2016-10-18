@@ -60,6 +60,11 @@ namespace Rings.Controllers
                 return Json(new { message =StringHelper.GetString("公司名称不存在",lan) });
             }
 
+            if (string.IsNullOrEmpty(username))
+            {
+                return Json(new { message = StringHelper.GetString("用户名不存在", lan) });
+            }
+
             DataTable dt = new DataTable();
             string userdbconnstr = dtCompany.Rows[0]["connectionstring"].ToString();
             using (NpgsqlConnection connection = new NpgsqlConnection(userdbconnstr))

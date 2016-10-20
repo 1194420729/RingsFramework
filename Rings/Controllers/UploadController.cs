@@ -95,7 +95,7 @@ namespace Rings.Controllers
             {
                 file.SaveAs(fileName);
 
-                return Json(new { message = "ok", url = domain + "/" + applicationid + "/" + date + "/" + newfilename, path = storageroot+"/" + applicationid + "/" + date + "/" + newfilename });
+                return Json(new { message = "ok", url = domain + "/" + applicationid + "/" + date + "/" + newfilename, path = storageroot + "/" + applicationid + "/" + date + "/" + newfilename });
             }
             catch (Exception ex)
             {
@@ -105,6 +105,79 @@ namespace Rings.Controllers
 
         }
 
+        [HttpPost]
+        public ActionResult UploadFiles()
+        {
+            if (Request.Files == null || Request.Files.Count == 0)
+            {
+                return Json(new { message = "请选择文件" });
+            }
+
+            for (int i = 0; i < Request.Files.Count; i++)
+            {
+                HttpPostedFileBase file = Request.Files[i];
+
+                if (file.ContentLength == 0)
+                {
+                    return Json(new { message = "文件不合法" });
+                }
+
+                int size = file.ContentLength / 1024;
+                if (size > 10240)
+                {
+                    return Json(new { message = "单个文件大小超出限制，请不要超过10M" });
+                }
+            }
+
+            string date = DateTime.Now.ToString("yyyyMMdd");
+            string applicationid = User.Identity.GetAccount().ApplicationId;
+            string path = Path.Combine(Server.MapPath(storageroot), applicationid, date);
+            if (Directory.Exists(path) == false)
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            List<object> list = new List<object>();
+            for (int i = 0; i < Request.Files.Count; i++)
+            {
+                HttpPostedFileBase file = Request.Files[i];
+
+                string newfilename = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+                string fileName = Path.Combine(path, newfilename);
+
+                try
+                {
+                    file.SaveAs(fileName);
+                    list.Add(new
+                    {
+                        name = file.FileName,
+                        url = domain + "/" + applicationid + "/" + date + "/" + newfilename,
+                        size = GetFileSizeFriendly(file.ContentLength)
+                    });
+
+                }
+                catch (Exception ex)
+                {
+                    Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+                    return Json(new { message = "上传出错" });
+                }
+            }
+
+            return Json(new { message = "ok", urls = list });
+        }
+
+        private string GetFileSizeFriendly(int size)
+        {
+            int m1 = 1024 * 1024;
+            if (size < m1)
+            {
+                return (size / 1024) + "KB";
+            }
+            else
+            {
+                return Math.Round(Convert.ToDecimal(size) / Convert.ToDecimal(m1), 2) + "MB";
+            }
+        }
 
     }
 }

@@ -26,7 +26,7 @@ namespace Rings.Models
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.Connection = connection;
 
-                command.CommandText = "select id,content->>'username' as username,content->>'password' as password,content->>'name' as name from \"employee\" where content->>'username'=@username";
+                command.CommandText = "select id,content->>'username' as username,content->>'password' as password,content->>'name' as name,coalesce(content->>'limit','') as limits from \"employee\" where content->>'username'=@username";
                 command.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Text).Value = ss[2];
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
                 da.Fill(dt);
@@ -41,7 +41,8 @@ namespace Rings.Models
                 Name=dt.Rows[0]["name"].ToString(),
                 UserName=ss[2],
                 CompanyName=ss[1],
-                Language=ss[3]
+                Language=ss[3],
+                Limit = dt.Rows[0]["limits"].ToString()
 
             };
 

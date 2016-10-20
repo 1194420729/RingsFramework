@@ -15,6 +15,7 @@ namespace Rings.Models
         public string Name { get; set; }
         public string ApplicationId { get; set; }
         public string Language { get; set; }
+        public string Limit { get; set; }
     }
 
     [Serializable]

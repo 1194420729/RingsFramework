@@ -13,9 +13,14 @@ namespace Rings.Models
     {
         private string connectionstring;
         private string postgres_connectionstring;
+        private int corporationid;
+        private string applicationid;
 
         public DataContext(string applicationid)
         {
+            this.applicationid = applicationid;
+
+            DataTable dt = new DataTable();
             string connectionstr = ConfigurationManager.ConnectionStrings["CentralDB"].ConnectionString;
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionstr))
             {
@@ -24,20 +29,24 @@ namespace Rings.Models
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.Connection = connection;
 
-                command.CommandText = "select connectionstring from corporation where applicationid=@applicationid";
+                command.CommandText = "select id,connectionstring from corporation where applicationid=@applicationid";
                 command.Parameters.Add("applicationid", NpgsqlTypes.NpgsqlDbType.Text).Value = applicationid;
-
-                this.connectionstring = command.ExecuteScalar().ToString();
-
+                
+                NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
+                da.Fill(dt);
+                
                 connection.Close();
             }
+
+            this.connectionstring = dt.Rows[0]["connectionstring"].ToString();
+            this.corporationid = Convert.ToInt32(dt.Rows[0]["id"]);
 
             this.postgres_connectionstring = this.connectionstring;
 
             //每个登录用户拥有自己的数据库角色
             if (PluginContext.Current != null && PluginContext.Current.Account.Id > 1)
             {
-                string role = "myuid" + PluginContext.Current.Account.Id;
+                string role = this.GetCurrentUserRole();
                 string[] ss = this.connectionstring.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 string uid = "uid=postgres";
                 string pwd = "pwd=password";
@@ -56,7 +65,16 @@ namespace Rings.Models
             }
         }
 
+        public string GetCurrentUserRole()
+        {
+            string role = "myuid" + this.corporationid + "_" + PluginContext.Current.Account.Id;
+
+            return role;
+        }
+
         public string ConnectionString { get { return this.connectionstring; } }
         public string PostgresConnectionString { get { return this.postgres_connectionstring; } }
+        public int CorporationId { get { return this.corporationid; } }
+        public string ApplicationId { get { return this.applicationid; } }
     }
 }

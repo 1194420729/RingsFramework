@@ -103,10 +103,11 @@ namespace Rings.Models
                 {
                     string limitname = lis[i].Attributes["ng-limit"];
                     bool isallowed = this.account.IsAllowed(limitname);
-                    lis[i].SetAttribute("ng-limit", isallowed.ToString().ToLower());
+                    lis[i].SetAttribute("menu-limit", isallowed.ToString().ToLower());
+                    lis[i].RemoveAttribute("ng-limit");
                 }
 
-                frag = frag.Select("li[ng-limit='false']").Remove();
+                frag = frag.Select("li[menu-limit='false']").Remove();
 
                 //去除没有子项的父菜单
                 bool hasempty = true;

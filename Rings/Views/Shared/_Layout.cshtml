@@ -82,6 +82,15 @@
                 cache: false
             });
 
+            $('nav#menu a').each(function () {
+
+                if ($(this).prop('href') === '@(Request.Url.OriginalString)') {
+                    $(this).parent().addClass('Selected');
+                } else {
+                    $(this).parent().removeClass('Selected');
+                }
+            });
+
             $('nav#menu').mmenu({
                 extensions: ['effect-slide-menu', 'pageshadow', 'iconbar', 'border-full', 'theme-dark'],
                 searchfield: { add: false },

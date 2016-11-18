@@ -22,6 +22,11 @@ namespace Rings.Models
             {
                 var account = HttpContext.Current.User.Identity.GetAccount();
 
+                if (partialViewName.StartsWith("/"))
+                {
+                    partialViewName = partialViewName.Substring(1);
+                }
+
                 PartialViewLocationFormats = new[]
                 {
                     "~/Views/"+account.ApplicationId+"/"+account.Language+"/{0}.cshtml",

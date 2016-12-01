@@ -45,7 +45,7 @@
 <script>
     $(function () {
         var url = '';
-       
+
         $('#printmodal').modal({});
 
         $('#btnprintpreview').click(function () {
@@ -76,17 +76,17 @@
             if (url != '') {
                 $('#printdialog').load(url);
                 url = '';
-            }  
+            }
         });
 
         $('#printtemplate').change(function () {
             if ($(this).val()) {
-                $.cookie('printtemplate_@(ViewBag.Category)', $(this).val(), { path: '/' });
+                window.localStorage.setItem('printtemplate_@(ViewBag.Category)', $(this).val());
             }
         });
 
-        var cookie_id = $.cookie('printtemplate_@(ViewBag.Category)');
-        $('#printtemplate').val(cookie_id);
+        var templatename = localStorage.getItem('printtemplate_@(ViewBag.Category)');
+        if (templatename) $('#printtemplate').val(templatename);
     });
-    
+
 </script>

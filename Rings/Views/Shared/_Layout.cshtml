@@ -82,14 +82,32 @@
                 cache: false
             });
 
-            $('nav#menu a').each(function () {
-
-                if ($(this).prop('href') === '@(Request.Url.OriginalString)') {
-                    $(this).parent().addClass('Selected');
-                } else {
-                    $(this).parent().removeClass('Selected');
+            var setmenuSelected = function () {
+                var menus = $('nav#menu a');
+                var hasmatch = false;
+                for (var i = 0; i < menus.length; i++) {
+                    if ($(menus[i]).prop('href') === '@(Request.Url.OriginalString)') {
+                        $(menus[i]).parent().addClass('Selected');
+                        window.localStorage.setItem('selectedmenu', $(menus[i]).prop('href'));
+                        hasmatch = true;
+                    } else {
+                        $(menus[i]).parent().removeClass('Selected');
+                    }
                 }
-            });
+
+                if (!hasmatch) {
+                    var selectedmenu = window.localStorage.getItem('selectedmenu');
+                    if (selectedmenu) {
+                        for (var i = 0; i < menus.length; i++) {
+                            if ($(menus[i]).prop('href') === selectedmenu) {
+                                $(menus[i]).parent().addClass('Selected');
+                            }
+                        }
+                    }
+                }
+            };
+
+            setmenuSelected(); 
 
             $('nav#menu').mmenu({
                 extensions: ['effect-slide-menu', 'pageshadow', 'iconbar', 'border-full', 'theme-dark'],

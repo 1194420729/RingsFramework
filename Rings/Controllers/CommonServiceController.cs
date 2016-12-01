@@ -17,6 +17,7 @@ namespace Rings.Controllers
             var virtualPath = Request.Path;//获取虚拟路径
              
             ViewBag.QueryString = Request.QueryString;
+            ViewBag.QueryStringDictionary = ToDictionary(Request.QueryString);
 
             string[] ss = virtualPath.Split(new char[]{'/'},StringSplitOptions.RemoveEmptyEntries);
             if (ss.Length==0)
@@ -38,5 +39,23 @@ namespace Rings.Controllers
             
         }
 
+        private IDictionary<string, object> ToDictionary(System.Collections.Specialized.NameValueCollection nv)
+        {
+            var result = new Dictionary<string, object>();
+            foreach (string key in nv.Keys)
+            {
+                string[] values = nv.GetValues(key);
+                if (values.Length == 1)
+                {
+                    result.Add(key, values[0]);
+                }
+                else
+                {
+                    result.Add(key, values);
+                }
+            }
+
+            return result;
+        }
     }
 }

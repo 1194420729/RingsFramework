@@ -121,6 +121,7 @@ namespace Rings.Models
             CQ header = doc.Select("#pageheader");
             CQ detail = doc.Select("#pagedetail");
             CQ footer = doc.Select("#pagefooter");
+            CQ pagenumber = doc.Select("#pagenumber");
             for (int i = 0; i < pages; i++)
             {
                 if (i == 0 || (template.RepeatHeader.HasValue && template.RepeatHeader.Value==true))
@@ -146,7 +147,12 @@ namespace Rings.Models
                 }
 
                 //分页符及页码
-                sb.AppendFormat("<center><div class=\"pagenumber\">{0}</div></center>",i+1);
+                if (pagenumber.Length > 0)
+                {
+                    string pg=HttpUtility.HtmlDecode(pagenumber.RenderSelection());
+                    //sb.AppendFormat("<center><div class=\"pagenumber\">{0}</div></center>", i + 1);
+                    sb.Append(pg.Replace("{no}", (i + 1).ToString()));
+                }
                 sb.Append("<div style=\"page-break-after:always;\"></div>");
 
             }

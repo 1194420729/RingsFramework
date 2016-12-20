@@ -7,9 +7,9 @@ angular.module('myservice').service('mytools', function () {
 
     this.qtyChange = function (obj, digit) {
         if (obj.qty && obj.price !== undefined && obj.price !== null) {
-            obj.total = this.toFixedNumber(obj.qty * obj.price, digit);
-            obj.taxtotal = this.toFixedNumber(obj.total * (100 + obj.taxrate) / 100, digit);
+            obj.total = this.toFixedNumber(obj.qty * obj.price, digit);            
             obj.taxprice = this.toFixedNumber(obj.price * (100 + obj.taxrate) / 100, digit);
+			obj.taxtotal = this.toFixedNumber(obj.taxprice * obj.qty, digit);
             obj.discounttotal = this.toFixedNumber(obj.taxtotal * obj.discountrate / 100, digit);
             obj.discountprice = this.toFixedNumber(obj.taxprice * obj.discountrate / 100, digit);
         }

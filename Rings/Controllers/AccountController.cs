@@ -31,7 +31,7 @@ namespace Rings.Controllers
         }
 
         [HttpPost] 
-        public ActionResult Login(string company,string username, string password, string validcode,string lan)
+        public ActionResult Login(string company,string username, string password, string validcode,string lan,int ztid)
         { 
             if (Session["yanzhengma"] == null || Session["yanzhengma"].ToString() != validcode)
             {
@@ -39,6 +39,7 @@ namespace Rings.Controllers
             }
 
             DataTable dtCompany = new DataTable();
+            DataTable dtParent = new DataTable();
             string connectionstr=ConfigurationManager.ConnectionStrings["CentralDB"].ConnectionString;
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionstr))
             {
@@ -47,17 +48,31 @@ namespace Rings.Controllers
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.Connection = connection;
 
-                command.CommandText = "select * from corporation where name=@name ";
-                command.Parameters.Add("name", NpgsqlTypes.NpgsqlDbType.Text).Value = company;
+                command.CommandText = "select id,applicationid,name,connectionstring,content->>'parentid' as parentid,(content->>'default')::bool as isdefault from corporation where id=" + ztid;
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
                 da.Fill(dtCompany);
+
+                if (dtCompany.Rows.Count > 0 && Convert.ToBoolean(dtCompany.Rows[0]["isdefault"])==false)
+                {
+                    command.CommandText = "select * from corporation where id=" + dtCompany.Rows[0]["parentid"]; 
+                    da.Fill(dtParent);
+                }
 
                 connection.Close();
             }
              
             if (dtCompany.Rows.Count == 0)
             {
-                return Json(new { message =StringHelper.GetString("公司名称不存在",lan) });
+                return Json(new { message =StringHelper.GetString("请选择账套",lan) });
+            }
+
+            if (Convert.ToBoolean(dtCompany.Rows[0]["isdefault"]) == false && dtParent.Rows[0]["name"].ToString()!=company)
+            {
+                return Json(new { message = StringHelper.GetString("公司名称不正确", lan) });
+            }
+            else if (Convert.ToBoolean(dtCompany.Rows[0]["isdefault"])  && dtCompany.Rows[0]["name"].ToString() != company)
+            {
+                return Json(new { message = StringHelper.GetString("公司名称不正确", lan) });
             }
 
             if (string.IsNullOrEmpty(username))
@@ -98,6 +113,57 @@ namespace Rings.Controllers
                 return Json(new { message = "ok" }, "text/plain");
             }
 
+        }
+
+        [HttpPost] 
+        public ActionResult GetZtList(string company)
+        {
+            List<object> list = new List<object>();
+            DataTable dtCompany = new DataTable();
+            string connectionstr = ConfigurationManager.ConnectionStrings["CentralDB"].ConnectionString;
+            using (NpgsqlConnection connection = new NpgsqlConnection(connectionstr))
+            {
+                connection.Open();
+
+                NpgsqlCommand command = new NpgsqlCommand();
+                command.Connection = connection;
+
+                command.CommandText = "select id,content->>'name' as name from corporation where name=@name and (content->>'default')::bool=true";
+                command.Parameters.Add("name", NpgsqlTypes.NpgsqlDbType.Text).Value = company;
+                NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
+                da.Fill(dtCompany);
+
+                if (dtCompany.Rows.Count == 0)
+                {
+                    connection.Close();
+                    return Json(new { message = "empty" });
+                }
+
+                list.Add(new
+                {
+                    id = Convert.ToInt32(dtCompany.Rows[0]["id"]),
+                    name = dtCompany.Rows[0]["name"].ToString()
+                });
+
+                command.Parameters.Clear();
+                command.CommandText = "select id,content->>'name' as name from corporation where (content->>'parentid')::int=" + Convert.ToInt32(dtCompany.Rows[0]["id"]);
+                dtCompany = new DataTable();
+                da.Fill(dtCompany);
+
+                connection.Close();
+            }
+
+            
+            foreach (DataRow row in dtCompany.Rows)
+            {
+                list.Add(new
+                {
+                    id = Convert.ToInt32(row["id"]),
+                    name = row["name"].ToString()
+                });
+            }
+
+            return this.MyJson(new { message = "ok", list = list });
         }
 
         [Authorize] 

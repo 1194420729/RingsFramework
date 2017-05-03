@@ -50,7 +50,7 @@
             <div class="col-md-6 col-md-offset-3">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        User Login
+                        企业资源管理系统登录
                     </div>
                     <div class="panel-body">
                         <div style="padding-top: 20px; padding-bottom: 20px">
@@ -63,34 +63,42 @@
                                     <td>
                                         <div class="form-group form-inline">
                                             <label>
-                                                Company
+                                                公司名称
                                             </label>
                                             <input type="text" class="form-control" id="company" style="width:300px;" />
                                         </div>
                                         <div class="form-group form-inline">
                                             <label>
-                                                User Name
+                                                选择账套
                                             </label>
-                                            <input type="text" class="form-control" id="username" style="width: 300px;" />
+                                            <select class="form-control" id="zt">
+                                                <option value="">请选择账套</option>
+                                            </select>
                                         </div>
                                         <div class="form-group form-inline">
                                             <label>
-                                                Password
+                                                用户名
+                                            </label>
+                                            <input type="text" class="form-control" id="username" autofocus="autofocus" style="width: 300px;" />
+                                        </div>
+                                        <div class="form-group form-inline">
+                                            <label>
+                                                密码
                                             </label>
                                             <input type="password" class="form-control" id="password" style="width: 300px;" />
                                         </div>
                                         <div class="form-group form-inline">
                                             <label>
-                                                Captcha
+                                                验证码
                                             </label>
                                             <input type="text" class="form-control" style="width: 80px" id="yzm" />
-                                            <a href="javascript:;" id="btnyzm">
+                                            <a href="javascript:;" id="btnyzm" tabindex="-1">
                                                 <img src="@Url.Action("yanzhengma")" alt="" />
                                             </a>
                                         </div>
                                         <div class="form-group form-inline">
                                             <label>
-                                                Language
+                                                语言
                                             </label>
                                             <select class="form-control" id="language">
                                                 <option value="zh-CN">中文</option>
@@ -98,7 +106,7 @@
                                             </select>
                                             <button id="btnlogin" class="btn btn-primary" type="button">
                                                 <i class="fa fa-key fw"></i>
-                                                Login
+                                                登录
                                             </button>
                                             <img src="~/Content/images/loader.gif" alt="" style="display: none; margin-left: 10px;"
                                                  id="ajaxloader" />
@@ -127,25 +135,31 @@
 
             $('#btnlogin').click(function () {
                 if (!$('#company').val()) {
-                    alertify.alert('Please input company name');
+                    alertify.alert('请填写公司名称');
+
+                    return;
+                }
+
+                if (!$('#zt').val()) {
+                    alertify.alert('请选择账套');
 
                     return;
                 }
 
                 if (!$('#username').val()) {
-                    alertify.alert('Please input user name');
+                    alertify.alert('请填写用户名');
 
                     return;
                 }
 
                 if (!$('#password').val()) {
-                    alertify.alert('Please input password');
+                    alertify.alert('请填写密码');
 
                     return;
                 }
 
                 if (!$('#yzm').val()) {
-                    alertify.alert('Please input Captcha');
+                    alertify.alert('请填写验证码');
 
                     return;
                 }
@@ -160,7 +174,8 @@
                         username: $('#username').val(),
                         password: $('#password').val(),
                         validcode: $('#yzm').val(),
-                        lan: $('#language').val()
+                        lan: $('#language').val(),
+                        ztid: $('#zt').val()
                     },
                     success: function (data) {
                         $('#ajaxloader').hide();
@@ -197,12 +212,35 @@
                 $(this).html('<img src="' + url + '" alt="" />');
             });
 
+            $('#company').change(function () {
+                if (!$('#company').val()) return;
+
+                $.ajax({
+                    url: '@Url.Action("getztlist", "account")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        company: $('#company').val()
+                    },
+                    success: function (data) {
+                        if (data.message == 'ok') {
+                            $('#zt').empty();
+                            $('#zt').append('<option value="">请选择账套</option>');
+                            $.each(data.list, function (index, item) {
+                                $('#zt').append('<option value="' + item.id + '">' + item.name + '</option>');
+                            });
+                        }
+                    }
+                });
+            });
+
             $('#company').val(localStorage.getItem('rings_company'));
             $('#language').val(localStorage.getItem('rings_language') || 'zh-CN');
-            
             if ('@(ViewBag.Lan)' !== $('#language').val()) {
                 $('#language').change();
             }
+
+            $('#company').change();
         });
     </script>
 </body>

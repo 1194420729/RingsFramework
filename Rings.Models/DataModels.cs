@@ -16,6 +16,8 @@ namespace Rings.Models
         public string ApplicationId { get; set; }
         public string Language { get; set; }
         public string Limit { get; set; }
+        public string ZtName { get; set; }
+        public bool IsDefaultZt { get; set; }
     }
 
     [Serializable]

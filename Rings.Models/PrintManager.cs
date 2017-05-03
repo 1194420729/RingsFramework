@@ -153,8 +153,10 @@ namespace Rings.Models
                     //sb.AppendFormat("<center><div class=\"pagenumber\">{0}</div></center>", i + 1);
                     sb.Append(pg.Replace("{no}", (i + 1).ToString()));
                 }
-                sb.Append("<div style=\"page-break-after:always;\"></div>");
-
+                if (i + 1 < pages)
+                {
+                    sb.Append("<div style=\"page-break-after:always;\"></div>");
+                }
             }
              
             return sb.ToString();

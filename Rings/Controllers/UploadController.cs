@@ -216,6 +216,13 @@ namespace Rings.Controllers
             return File(info.Path, mime);
         }
 
+        public ActionResult Temporary(string filename,string appid,string date)
+        {
+            string path=Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temporary", appid, date,filename);
+            string mime = MimeTypes.MimeTypeMap.GetMimeType(new FileInfo(path).Extension);
+            return File(path, mime);
+        }
+
         private string GetFileSizeFriendly(int size)
         {
             int m1 = 1024 * 1024;

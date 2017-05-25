@@ -62,9 +62,7 @@ namespace Rings.Controllers
                 return Json(new { message="服务不存在！"});
             }
 
-            AppSettingsReader reader = new AppSettingsReader();
-            string contextserviceurl = reader.GetValue("contextservice",typeof(string)).ToString();
-
+             
             //通过反射调用服务 
             AppDomainSetup setup = new AppDomainSetup();
             setup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -78,7 +76,7 @@ namespace Rings.Controllers
             string resultjson = "";
             try
             {
-                resultjson = loader.Run(dllpath, classname, methodname, parameters, account, contextserviceurl);
+                resultjson = loader.Run(dllpath, classname, methodname, parameters, account);
             }
             catch (Exception ex)
             {

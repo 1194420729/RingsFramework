@@ -141,7 +141,6 @@
   <ItemGroup>
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CommonServiceController.cs" />
-    <Compile Include="Controllers\ContextServiceController.cs" />
     <Compile Include="Controllers\PrintController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />
     <Compile Include="Controllers\UploadController.cs" />

@@ -48,13 +48,13 @@ namespace Rings.Controllers
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.Connection = connection;
 
-                command.CommandText = "select id,applicationid,name,connectionstring,content->>'parentid' as parentid,(content->>'default')::bool as isdefault from corporation where id=" + ztid;
+                command.CommandText = "select id,applicationid,name,connectionstring,content->>'rootid' as rootid,(content->>'default')::bool as isdefault from corporation where id=" + ztid;
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
                 da.Fill(dtCompany);
 
                 if (dtCompany.Rows.Count > 0 && Convert.ToBoolean(dtCompany.Rows[0]["isdefault"])==false)
                 {
-                    command.CommandText = "select * from corporation where id=" + dtCompany.Rows[0]["parentid"]; 
+                    command.CommandText = "select * from corporation where id=" + dtCompany.Rows[0]["rootid"]; 
                     da.Fill(dtParent);
                 }
 
@@ -146,7 +146,7 @@ namespace Rings.Controllers
                 });
 
                 command.Parameters.Clear();
-                command.CommandText = "select id,content->>'name' as name from corporation where (content->>'parentid')::int=" + Convert.ToInt32(dtCompany.Rows[0]["id"]);
+                command.CommandText = "select id,content->>'name' as name from corporation where (content->>'rootid')::int=" + Convert.ToInt32(dtCompany.Rows[0]["id"]);
                 dtCompany = new DataTable();
                 da.Fill(dtCompany);
 

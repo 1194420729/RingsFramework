@@ -139,11 +139,11 @@ namespace Rings.Models
                 Menu menu = new Menu()
                 {
                     Sort = sort == null ? 0 : Convert.ToInt32(sort),
-                    Group=group.ToString(),
-                    GroupSort = sort == null ? 0 : Convert.ToInt32(sort),
-                    GroupIcon = groupicon.ToString(),
+                    Group=group,
+                    GroupSort = groupsort == null ? 0 : Convert.ToInt32(groupsort),
+                    GroupIcon = groupicon,
                     Path = file,
-                    Html = frag.Select("ul").Html()
+                    Html = ul.Html()
                 };
 
                 list.Add(menu);
@@ -151,25 +151,36 @@ namespace Rings.Models
 
             //排序后拼装Menu
             StringBuilder sb = new StringBuilder();
-            //list = list.OrderByDescending(c => c.Sort).ToList();
+            
             var groups = (from c in list
                          group c by new { c.Group, c.GroupIcon, c.GroupSort } into g
                          select g.Key).OrderByDescending(c=>c.GroupSort).ToList();
 
-            foreach (var g in groups)
+            if (groups.Count == 1)
             {
-                sb.Append("<li>");
-                sb.AppendFormat("<span><i class=\"{0}\"></i><span class=\"menutitle\">{1}</span></span>",g.GroupIcon,g.Group);
-                sb.Append("<ul>");
-                list = list.Where(c=>c.Group==g.Group).OrderByDescending(c => c.Sort).ToList();
+                //仅有一个模块组，忽略组名称
+                list = list.OrderByDescending(c => c.Sort).ToList();
                 foreach (var item in list)
                 {
                     sb.AppendFormat(item.Html);
                 }
-                sb.Append("</ul>");
-                sb.Append("</li>");
             }
-
+            else
+            {
+                foreach (var g in groups)
+                {
+                    sb.Append("<li>");
+                    sb.AppendFormat("<span><i class=\"{0}\"></i><span class=\"menutitle\">{1}</span></span>", g.GroupIcon, g.Group);
+                    sb.Append("<ul>");
+                    var sublist = list.Where(c => c.Group == g.Group).OrderByDescending(c => c.Sort).ToList();
+                    foreach (var item in sublist)
+                    {
+                        sb.AppendFormat(item.Html);
+                    }
+                    sb.Append("</ul>");
+                    sb.Append("</li>");
+                }
+            }
             return sb.ToString();
 
         }

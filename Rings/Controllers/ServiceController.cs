@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Runtime.Remoting.Lifetime;
 using System.Configuration;
+using System.Threading.Tasks;
 
 namespace Rings.Controllers
 {
@@ -18,7 +19,13 @@ namespace Rings.Controllers
     {
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult ServiceFactory()
+        public Task<ActionResult> ServiceFactory()
+        {
+            return Task.Factory.StartNew(() => { return RunService(); })
+                .ContinueWith<ActionResult>((task) => { return Content(task.Result, "application/json", Encoding.UTF8); });
+        }
+
+        private string RunService()
         {
             string parameters = "";
             if (Request.InputStream.Length > 0)
@@ -41,7 +48,7 @@ namespace Rings.Controllers
             string classname = ss[ss.Length - 2];
             string methodname = ss[ss.Length - 1];
 
-            paths.Add(Server.MapPath("~/Views/" + account.ApplicationId + "/"+account.Language+"/"+  componentname + "/" + assemblyname + ".dll"));
+            paths.Add(Server.MapPath("~/Views/" + account.ApplicationId + "/" + account.Language + "/" + componentname + "/" + assemblyname + ".dll"));
             paths.Add(Server.MapPath("~/Views/" + account.ApplicationId + "/" + componentname + "/" + assemblyname + ".dll"));
             paths.Add(Server.MapPath("~/Views/Default/" + account.Language + "/" + componentname + "/" + assemblyname + ".dll"));
             paths.Add(Server.MapPath("~/Views/Default/" + componentname + "/" + assemblyname + ".dll"));
@@ -58,11 +65,12 @@ namespace Rings.Controllers
 
             if (string.IsNullOrEmpty(dllpath))
             {
-                Elmah.ErrorSignal.FromCurrentContext().Raise(new FileNotFoundException("请求："+virtualPath+"，对应的程序集不存在"));
-                return Json(new { message="服务不存在！"});
+                //Elmah.ErrorSignal.FromCurrentContext().Raise(new FileNotFoundException("请求：" + virtualPath + "，对应的程序集不存在"));
+                Elmah.ErrorLog.GetDefault(null).Log(new Elmah.Error(new FileNotFoundException("请求：" + virtualPath + "，对应的程序集不存在")));
+                return JsonConvert.SerializeObject(new { message = "服务不存在！" });
             }
 
-             
+
             //通过反射调用服务 
             AppDomainSetup setup = new AppDomainSetup();
             setup.ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -70,9 +78,9 @@ namespace Rings.Controllers
             setup.LoaderOptimization = LoaderOptimization.MultiDomain;
             setup.ConfigurationFile = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
             setup.ApplicationTrust = AppDomain.CurrentDomain.SetupInformation.ApplicationTrust;
-            
-            AppDomain domain=AppDomain.CreateDomain(Guid.NewGuid().ToString(),null,setup);
-            PluginLoader loader= domain.CreateInstanceAndUnwrap(typeof(PluginLoader).Assembly.FullName, typeof(PluginLoader).FullName) as PluginLoader;
+
+            AppDomain domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), null, setup);
+            PluginLoader loader = domain.CreateInstanceAndUnwrap(typeof(PluginLoader).Assembly.FullName, typeof(PluginLoader).FullName) as PluginLoader;
             string resultjson = "";
             try
             {
@@ -80,15 +88,14 @@ namespace Rings.Controllers
             }
             catch (Exception ex)
             {
-                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
-                resultjson = JsonConvert.SerializeObject(new { message=ex.InnerException==null? ex.Message:ex.InnerException.Message});
+                //Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+                Elmah.ErrorLog.GetDefault(null).Log(new Elmah.Error(ex));
+                resultjson = JsonConvert.SerializeObject(new { message = ex.InnerException == null ? ex.Message : ex.InnerException.Message });
             }
-             
+
             AppDomain.Unload(domain);
 
-            return Content(resultjson,"application/json",Encoding.UTF8);
+            return resultjson;
         }
-    }
-
-     
+    }     
 }

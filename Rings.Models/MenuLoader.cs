@@ -130,11 +130,18 @@ namespace Rings.Models
 
                 #endregion
 
-                object sort = frag.Select("ul[data-sort]").Data("sort");
-
+                var ul = frag.Select("ul[data-sort]");
+                string sort = ul.DataRaw("sort");
+                string group = ul.DataRaw("group");
+                string groupsort = ul.DataRaw("groupsort");
+                string groupicon = ul.DataRaw("groupicon");
+                 
                 Menu menu = new Menu()
                 {
                     Sort = sort == null ? 0 : Convert.ToInt32(sort),
+                    Group=group.ToString(),
+                    GroupSort = sort == null ? 0 : Convert.ToInt32(sort),
+                    GroupIcon = groupicon.ToString(),
                     Path = file,
                     Html = frag.Select("ul").Html()
                 };
@@ -143,11 +150,24 @@ namespace Rings.Models
             }
 
             //排序后拼装Menu
-            list = list.OrderByDescending(c => c.Sort).ToList();
             StringBuilder sb = new StringBuilder();
-            foreach (var item in list)
+            //list = list.OrderByDescending(c => c.Sort).ToList();
+            var groups = (from c in list
+                         group c by new { c.Group, c.GroupIcon, c.GroupSort } into g
+                         select g.Key).OrderByDescending(c=>c.GroupSort).ToList();
+
+            foreach (var g in groups)
             {
-                sb.AppendFormat(item.Html);
+                sb.Append("<li>");
+                sb.AppendFormat("<span><i class=\"{0}\"></i><span class=\"menutitle\">{1}</span></span>",g.GroupIcon,g.Group);
+                sb.Append("<ul>");
+                list = list.Where(c=>c.Group==g.Group).OrderByDescending(c => c.Sort).ToList();
+                foreach (var item in list)
+                {
+                    sb.AppendFormat(item.Html);
+                }
+                sb.Append("</ul>");
+                sb.Append("</li>");
             }
 
             return sb.ToString();

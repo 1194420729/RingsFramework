@@ -69,6 +69,9 @@ namespace Rings.Models
         public int Sort { get; set; }
         public string Path { get; set; }
         public string Html { get; set; }
+        public string Group { get; set; }
+        public int GroupSort { get; set; }
+        public string GroupIcon { get; set; }
     }
 
     [Serializable]

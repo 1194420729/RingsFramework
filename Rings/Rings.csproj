@@ -161,6 +161,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Content Include="App_Readme\Elmah.txt" />
+    <Content Include="Content\images\blueword.png" />
     <Content Include="Content\images\cart.png" />
     <Content Include="Content\images\closeall.png" />
     <Content Include="Content\images\down.png" />
@@ -175,6 +176,7 @@
     <Content Include="Content\images\mail.png" />
     <Content Include="Content\images\mslogo.png" />
     <Content Include="Content\images\nopic.gif" />
+    <Content Include="Content\images\redword.png" />
     <Content Include="Content\images\toggle.png" />
     <Content Include="Content\images\toggle_expand.png" />
     <Content Include="Content\images\up.png" />

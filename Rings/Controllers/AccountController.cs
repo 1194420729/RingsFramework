@@ -174,6 +174,22 @@ namespace Rings.Controllers
             return RedirectToAction("Login");
         }
 
+        [HttpPost]
+        public ActionResult UnitTestLogin()
+        {
+#if DEBUG
+            string applicationid="D36F64D9-4646-4531-990B-B7A3FA5FAEF2";
+            string company="测试公司";
+            string username="001";
+            string lan="zh-CN";
+            FormsAuthentication.SetAuthCookie(applicationid + "`" + company + "`" + username + "`" + lan, false);
+            return Content("ok","text/plain",System.Text.Encoding.UTF8);
+#else
+
+            return Content("error", "text/plain", System.Text.Encoding.UTF8);
+#endif
+        }
+
         public ActionResult Yanzhengma()
         {
             string str = getRandomValidate(4);

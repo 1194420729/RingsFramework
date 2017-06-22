@@ -61,6 +61,9 @@ namespace Rings.Models
         public string Name { get; set; }
         public string Title { get; set; } 
         public string GroupName { get; set; }
+        public string ModuleName { get; set; }
+        public int GroupSort { get; set; }
+        public int ModuleSort { get; set; }
     }
 
     [Serializable]

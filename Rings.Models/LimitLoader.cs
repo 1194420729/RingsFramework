@@ -7,14 +7,15 @@ using System.Xml;
 using Npgsql;
 using Newtonsoft.Json;
 using System.Text;
+using CsQuery;
 
 namespace Rings.Models
 {
     public class LimitLoader
     {
         public void Load()
-        { 
-           
+        {
+
             string applicationid = PluginContext.Current.Account.ApplicationId;
 
             List<Limit> list = new List<Limit>();
@@ -24,7 +25,7 @@ namespace Rings.Models
             string[] subdirs = new string[] { };
             if (Directory.Exists(applicationpath))
             {
-                subdirs=Directory.GetDirectories(applicationpath, "*", SearchOption.TopDirectoryOnly);
+                subdirs = Directory.GetDirectories(applicationpath, "*", SearchOption.TopDirectoryOnly);
             }
 
             foreach (string dir in subdirs)
@@ -32,7 +33,7 @@ namespace Rings.Models
                 string path = Path.Combine(dir, "limits.config.xml");
                 if (File.Exists(path))
                 {
-                    list.AddRange(ReadConfigFile(path,applicationid));
+                    list.AddRange(ReadConfigFile(path, applicationid));
                 }
             }
 
@@ -45,7 +46,7 @@ namespace Rings.Models
                 string path = Path.Combine(subdir, "limits.config.xml");
                 if (File.Exists(path))
                 {
-                    list.AddRange(ReadConfigFile(path,applicationid));
+                    list.AddRange(ReadConfigFile(path, applicationid));
                 }
 
             }
@@ -69,16 +70,25 @@ namespace Rings.Models
                 NpgsqlCommand command = new NpgsqlCommand();
                 command.Connection = connection;
 
-                command.CommandText = "delete from \"limit\" where content->>'name' not in "+sb.ToString();
+                command.CommandText = "delete from \"limit\" where content->>'name' not in " + sb.ToString();
                 command.ExecuteNonQuery();
 
                 connection.Close();
             }
-            
+
         }
 
-        private List<Limit> ReadConfigFile(string path,string applicationid)
+        private List<Limit> ReadConfigFile(string path, string applicationid)
         {
+            //读取同目录下的Menu.cshtml
+            string menupath = Path.Combine(new FileInfo(path).DirectoryName, "menu.cshtml");
+            string html = File.ReadAllText(menupath, Encoding.UTF8);
+            CQ frag = CQ.CreateFragment(html);
+            var ul = frag.Select("ul[data-sort]");
+            string sort = ul.DataRaw("sort");
+            string group = ul.DataRaw("group");
+            string groupsort = ul.DataRaw("groupsort");
+
             List<Limit> list = new List<Limit>();
 
             DataContext db = new DataContext(applicationid);
@@ -86,15 +96,18 @@ namespace Rings.Models
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
 
-            XmlNodeList nodes= doc.DocumentElement.SelectNodes("/limits/limit");
+            XmlNodeList nodes = doc.DocumentElement.SelectNodes("/limits/limit");
 
             foreach (XmlNode node in nodes)
             {
                 Limit limit = new Limit()
                 {
-                    Name=node.Attributes["name"].Value,
-                    Title=node.Attributes["title"].Value,
-                    GroupName=node.Attributes["groupname"].Value
+                    Name = node.Attributes["name"].Value,
+                    Title = node.Attributes["title"].Value,
+                    GroupName = node.Attributes["groupname"].Value,
+                    ModuleName = node.Attributes["modulename"] == null ? group : node.Attributes["modulename"].Value,
+                    GroupSort=Convert.ToInt32(sort),
+                    ModuleSort=Convert.ToInt32(groupsort)
                 };
                 list.Add(limit);
 
@@ -108,7 +121,7 @@ namespace Rings.Models
                     command.CommandText = "select id from \"limit\" where content->>'name' =@name limit 1";
                     command.Parameters.Add("name", NpgsqlTypes.NpgsqlDbType.Text).Value = limit.Name;
 
-                    object obj=command.ExecuteScalar();
+                    object obj = command.ExecuteScalar();
                     if (obj == null)
                     {
                         command.Parameters.Clear();

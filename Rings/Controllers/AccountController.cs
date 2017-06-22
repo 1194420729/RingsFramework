@@ -2,45 +2,45 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.Mvc; 
+using System.Web.Mvc;
 using System.Data;
-using System.Web.Security; 
+using System.Web.Security;
 using System.Drawing;
 using System.IO;
 using Npgsql;
 using System.Configuration;
 using System.Globalization;
-using System.Threading; 
+using System.Threading;
 using System.Resources;
 using Rings.Models;
 
 namespace Rings.Controllers
 {
     public class AccountController : Controller
-    { 
+    {
         public ActionResult Login(string lan)
         {
             ViewBag.Lan = lan;
 
-            if (string.IsNullOrEmpty(lan) == false && lan.ToLower()!="zh-cn")
+            if (string.IsNullOrEmpty(lan) == false && lan.ToLower() != "zh-cn")
             {
-                return View(lan+"/login");
+                return View(lan + "/login");
             }
 
             return View();
         }
 
-        [HttpPost] 
-        public ActionResult Login(string company,string username, string password, string validcode,string lan,int ztid)
-        { 
+        [HttpPost]
+        public ActionResult Login(string company, string username, string password, string validcode, string lan, int ztid)
+        {
             if (Session["yanzhengma"] == null || Session["yanzhengma"].ToString() != validcode)
             {
-                return Json(new { message =StringHelper.GetString("验证码不正确",lan) });
+                return Json(new { message = StringHelper.GetString("验证码不正确", lan) });
             }
 
             DataTable dtCompany = new DataTable();
-            DataTable dtParent = new DataTable();
-            string connectionstr=ConfigurationManager.ConnectionStrings["CentralDB"].ConnectionString;
+            DataTable dtParent = null;
+            string connectionstr = ConfigurationManager.ConnectionStrings["CentralDB"].ConnectionString;
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionstr))
             {
                 connection.Open();
@@ -52,25 +52,26 @@ namespace Rings.Controllers
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
                 da.Fill(dtCompany);
 
-                if (dtCompany.Rows.Count > 0 && Convert.ToBoolean(dtCompany.Rows[0]["isdefault"])==false)
+                if (dtCompany.Rows.Count > 0 && Convert.ToBoolean(dtCompany.Rows[0]["isdefault"]) == false)
                 {
-                    command.CommandText = "select * from corporation where id=" + dtCompany.Rows[0]["rootid"]; 
+                    dtParent = new DataTable();
+                    command.CommandText = "select * from corporation where id=" + dtCompany.Rows[0]["rootid"];
                     da.Fill(dtParent);
                 }
 
                 connection.Close();
             }
-             
+
             if (dtCompany.Rows.Count == 0)
             {
-                return Json(new { message =StringHelper.GetString("请选择账套",lan) });
+                return Json(new { message = StringHelper.GetString("请选择账套", lan) });
             }
 
-            if (Convert.ToBoolean(dtCompany.Rows[0]["isdefault"]) == false && dtParent.Rows[0]["name"].ToString()!=company)
+            if (Convert.ToBoolean(dtCompany.Rows[0]["isdefault"]) == false && dtParent.Rows[0]["name"].ToString() != company)
             {
                 return Json(new { message = StringHelper.GetString("公司名称不正确", lan) });
             }
-            else if (Convert.ToBoolean(dtCompany.Rows[0]["isdefault"])  && dtCompany.Rows[0]["name"].ToString() != company)
+            else if (Convert.ToBoolean(dtCompany.Rows[0]["isdefault"]) && dtCompany.Rows[0]["name"].ToString() != company)
             {
                 return Json(new { message = StringHelper.GetString("公司名称不正确", lan) });
             }
@@ -95,27 +96,28 @@ namespace Rings.Controllers
                 da.Fill(dt);
 
                 connection.Close();
-            } 
+            }
 
-            if (dt.Rows.Count==0)
+            if (dt.Rows.Count == 0)
             {
-                return Json(new { message = StringHelper.GetString("用户名不存在",lan) }, "text/plain");
+                return Json(new { message = StringHelper.GetString("用户名不存在", lan) }, "text/plain");
             }
             else
             {
                 string md5 = FormsAuthentication.HashPasswordForStoringInConfigFile(password, "MD5");
                 if (string.IsNullOrEmpty(password) || md5 != dt.Rows[0]["password"].ToString())
                 {
-                    return Json(new { message = StringHelper.GetString("密码错误",lan) }, "text/plain");
+                    return Json(new { message = StringHelper.GetString("密码错误", lan) }, "text/plain");
                 }
-                 
-                FormsAuthentication.SetAuthCookie(dtCompany.Rows[0]["applicationid"] + "`" + company + "`" + username + "`" + lan, false);
+
+                FormsAuthentication.SetAuthCookie(dtCompany.Rows[0]["applicationid"] + "`" + company + "`" + username + "`" + lan + "`"
+                    + (dtParent == null ? dtCompany.Rows[0]["applicationid"].ToString() : dtParent.Rows[0]["applicationid"].ToString()), false);
                 return Json(new { message = "ok" }, "text/plain");
             }
 
         }
 
-        [HttpPost] 
+        [HttpPost]
         public ActionResult GetZtList(string company)
         {
             List<object> list = new List<object>();
@@ -153,7 +155,7 @@ namespace Rings.Controllers
                 connection.Close();
             }
 
-            
+
             foreach (DataRow row in dtCompany.Rows)
             {
                 list.Add(new
@@ -166,9 +168,9 @@ namespace Rings.Controllers
             return this.MyJson(new { message = "ok", list = list });
         }
 
-        [Authorize] 
+        [Authorize]
         public ActionResult Logout(string username, string password)
-        { 
+        {
             FormsAuthentication.SignOut();
 
             return RedirectToAction("Login");

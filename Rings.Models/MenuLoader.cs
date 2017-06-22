@@ -25,7 +25,7 @@ namespace Rings.Models
             Dictionary<string, string> dic = new Dictionary<string, string>();
 
             //当前用户自定义目录下的指定语言目录
-            string path = HttpContext.Current.Server.MapPath("~/Views/" + this.applicationid + "/" + this.language);
+            string path = HttpContext.Current.Server.MapPath("~/Views/" + this.account.RootApplicationId + "/" + this.language);
             string[] files = new string[] { };
             if (Directory.Exists(path))
             {
@@ -40,7 +40,7 @@ namespace Rings.Models
             }
 
             //当前用户自定义目录下的默认语言目录
-            path = HttpContext.Current.Server.MapPath("~/Views/" + this.applicationid);
+            path = HttpContext.Current.Server.MapPath("~/Views/" + this.account.RootApplicationId);
             if (Directory.Exists(path))
             {
                 string[] files2 = Directory.GetFiles(path, "menu.cshtml", SearchOption.AllDirectories);

@@ -37,6 +37,7 @@ namespace Rings.Models
         {
             string[] ss = identity.Name.Split(new char[] { '`' }, StringSplitOptions.RemoveEmptyEntries);
             string applicationid = ss[0];
+            string rootapplicationid = ss[4];
 
             DataContext db = new DataContext(applicationid);
             DataTable dt = new DataTable(); 
@@ -74,6 +75,7 @@ namespace Rings.Models
             Account account = new Account()
             {
                 ApplicationId=applicationid,
+                RootApplicationId = rootapplicationid,
                 Id=Convert.ToInt32(dt.Rows[0]["id"]),
                 Name=dt.Rows[0]["name"].ToString(),
                 UserName=ss[2],

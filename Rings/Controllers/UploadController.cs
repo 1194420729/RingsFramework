@@ -39,7 +39,7 @@ namespace Rings.Controllers
             }
 
             string date = DateTime.Now.ToString("yyyyMMdd");
-            string applicationid = User.Identity.GetAccount().ApplicationId;
+            string applicationid = User.Identity.GetAccount().RootApplicationId;
             string path = Path.Combine(storageroot, applicationid, date);
             if (Directory.Exists(path) == false)
             {
@@ -93,7 +93,7 @@ namespace Rings.Controllers
             }
 
             string date = DateTime.Now.ToString("yyyyMMdd");
-            string applicationid = User.Identity.GetAccount().ApplicationId;
+            string applicationid = User.Identity.GetAccount().RootApplicationId;
             string path = Path.Combine(storageroot, applicationid, date);
             if (Directory.Exists(path) == false)
             {
@@ -162,7 +162,7 @@ namespace Rings.Controllers
             }
 
             string date = DateTime.Now.ToString("yyyyMMdd");
-            string applicationid = User.Identity.GetAccount().ApplicationId;
+            string applicationid = User.Identity.GetAccount().RootApplicationId;
             string path = Path.Combine(storageroot, applicationid, date);
             if (Directory.Exists(path) == false)
             {

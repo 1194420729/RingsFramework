@@ -21,7 +21,7 @@ namespace Rings.Models
             List<Limit> list = new List<Limit>();
 
             //查找定制目录下的权限配置 
-            string applicationpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views\\" + applicationid);
+            string applicationpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Views\\" + PluginContext.Current.Account.RootApplicationId);
             string[] subdirs = new string[] { };
             if (Directory.Exists(applicationpath))
             {

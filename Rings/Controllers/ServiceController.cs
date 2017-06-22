@@ -48,8 +48,8 @@ namespace Rings.Controllers
             string classname = ss[ss.Length - 2];
             string methodname = ss[ss.Length - 1];
 
-            paths.Add(Server.MapPath("~/Views/" + account.ApplicationId + "/" + account.Language + "/" + componentname + "/" + assemblyname + ".dll"));
-            paths.Add(Server.MapPath("~/Views/" + account.ApplicationId + "/" + componentname + "/" + assemblyname + ".dll"));
+            paths.Add(Server.MapPath("~/Views/" + account.RootApplicationId + "/" + account.Language + "/" + componentname + "/" + assemblyname + ".dll"));
+            paths.Add(Server.MapPath("~/Views/" + account.RootApplicationId + "/" + componentname + "/" + assemblyname + ".dll"));
             paths.Add(Server.MapPath("~/Views/Default/" + account.Language + "/" + componentname + "/" + assemblyname + ".dll"));
             paths.Add(Server.MapPath("~/Views/Default/" + componentname + "/" + assemblyname + ".dll"));
 

@@ -114,6 +114,7 @@ namespace Rings.Models
             //计算分页
             int lines = template.FixedLines.HasValue ? template.FixedLines.Value : template.MaxLines.Value;
             int pages = model.DetailValue.Count / lines + ((model.DetailValue.Count % lines) > 0 ? 1 : 0);
+            if (pages == 0) pages = 1;
 
             //每页渲染
             StringBuilder sb = new StringBuilder();
@@ -124,35 +125,47 @@ namespace Rings.Models
             CQ pagenumber = doc.Select("#pagenumber");
             for (int i = 0; i < pages; i++)
             {
-                if (i == 0 || (template.RepeatHeader.HasValue && template.RepeatHeader.Value==true))
+                if (header != null)
                 {
-                    //表头                    
-                    string headerhtml = HttpUtility.HtmlDecode(header.RenderSelection());
-                    sb.Append(RenderHeaderFooter(headerhtml, model));
+                    if (i == 0 || (template.RepeatHeader.HasValue && template.RepeatHeader.Value == true))
+                    {
+                        //表头                    
+                        string headerhtml = HttpUtility.HtmlDecode(header.RenderSelection());
+                        sb.Append(RenderHeaderFooter(headerhtml, model));
+                    }
                 }
 
                 //明细
-                PrintData modeldetail = new PrintData();
-                modeldetail.DetailField = model.DetailField; 
-                modeldetail.DetailValue = model.DetailValue.Skip(i * lines).Take(lines).ToList();
-                string detailhtml = HttpUtility.HtmlDecode(detail.RenderSelection());
-                sb.Append(RenderHeaderFooter(RenderDetail(detailhtml, modeldetail),model));
-                 
-
-                if (i == pages-1 || (template.RepeatHeader.HasValue && template.RepeatHeader.Value == true))
+                if (detail != null)
                 {
-                    //表尾
-                    string footerhtml = HttpUtility.HtmlDecode(footer.RenderSelection());
-                    sb.Append(RenderHeaderFooter(footerhtml, model));
+                    PrintData modeldetail = new PrintData();
+                    modeldetail.DetailField = model.DetailField;
+                    modeldetail.DetailValue = model.DetailValue.Skip(i * lines).Take(lines).ToList();
+                    string detailhtml = HttpUtility.HtmlDecode(detail.RenderSelection());
+                    sb.Append(RenderHeaderFooter(RenderDetail(detailhtml, modeldetail), model));
+                }
+
+                if (footer != null)
+                {
+                    if (i == pages - 1 || (template.RepeatHeader.HasValue && template.RepeatHeader.Value == true))
+                    {
+                        //表尾
+                        string footerhtml = HttpUtility.HtmlDecode(footer.RenderSelection());
+                        sb.Append(RenderHeaderFooter(footerhtml, model));
+                    }
                 }
 
                 //分页符及页码
-                if (pagenumber.Length > 0)
+                if (pagenumber != null)
                 {
-                    string pg=HttpUtility.HtmlDecode(pagenumber.RenderSelection());
-                    //sb.AppendFormat("<center><div class=\"pagenumber\">{0}</div></center>", i + 1);
-                    sb.Append(pg.Replace("{no}", (i + 1).ToString()));
+                    if (pagenumber.Length > 0)
+                    {
+                        string pg = HttpUtility.HtmlDecode(pagenumber.RenderSelection());
+                        //sb.AppendFormat("<center><div class=\"pagenumber\">{0}</div></center>", i + 1);
+                        sb.Append(pg.Replace("{no}", (i + 1).ToString()));
+                    }
                 }
+
                 if (i + 1 < pages)
                 {
                     sb.Append("<div style=\"page-break-after:always;\"></div>");

@@ -59,7 +59,7 @@ namespace Rings.Controllers
 
 
         public ActionResult PrintPreview(int templateid, int modelid)
-        { 
+        {
             var template = GetPrintTemplateById(templateid);
 
             var account = User.Identity.GetAccount();
@@ -74,13 +74,30 @@ namespace Rings.Controllers
 
 
         public ActionResult PrintDesigner(string category, int? templateid, int modelid)
-        { 
+        {
 
             ViewBag.Width = 210;
             ViewBag.Height = 297;
             ViewBag.Padding = 5;
             ViewBag.RepeatHeader = false;
-            
+            ViewBag.FixedLines = 8;
+            ViewBag.BlankTemplate = "<div id=\"pageheader\" style=\"font-size:14.5px;\">" +
+                                        "这里是页头" +
+                                    "</div>" +
+                                    "<div id=\"pagedetail\" style=\"font-size:14.5px;\">" +
+                                        "这里是明细" +
+                                    "</div>" +
+                                    "<div id=\"pagefooter\">" +
+                                        "这里是页脚" +
+                                    "</div>" +
+                                    "<div id=\"pagenumber\">" +
+                                        "<div style=\"float:right;\">" +
+                                            "{no}" +
+                                        "</div>" +
+                                        "<div style=\"clear:both;\">" +
+                                        "</div>" +
+                                    "</div>";
+
             if (templateid.HasValue)
             {
                 var template = GetPrintTemplateById(templateid.Value);
@@ -97,7 +114,7 @@ namespace Rings.Controllers
             ViewBag.TemplateId = templateid;
             ViewBag.Category = category;
             ViewBag.ModelId = modelid;
-            
+
 
             var account = User.Identity.GetAccount();
             PrintManager pm = new PrintManager(account.ApplicationId);
@@ -113,7 +130,7 @@ namespace Rings.Controllers
         {
             var account = User.Identity.GetAccount();
             DataContext db = new DataContext(account.ApplicationId);
-             
+
             string json = JsonConvert.SerializeObject(item);
 
             using (NpgsqlConnection connection = new NpgsqlConnection(db.ConnectionString))
@@ -125,10 +142,24 @@ namespace Rings.Controllers
 
                 if (id.HasValue)
                 {
+                    command.CommandText = "select count(0) as cnt from printtemplate where content->>'name'='" + item.Name + "' and content->>'category'='" + item.Category + "' and id<>" + id.Value;
+                    int cnt = Convert.ToInt32(command.ExecuteScalar());
+                    if (cnt > 0)
+                    {
+                        return Json(new { message = "模板名称重复！" }, "text/plain");
+                    }
+
                     command.CommandText = "update printtemplate set content=@content  where id=" + id.Value;
                 }
                 else
                 {
+                    command.CommandText = "select count(0) as cnt from printtemplate where content->>'name'='" + item.Name + "' and content->>'category'='" + item.Category + "' ";
+                    int cnt = Convert.ToInt32(command.ExecuteScalar());
+                    if (cnt > 0)
+                    {
+                        return Json(new { message = "模板名称重复！" }, "text/plain");
+                    }
+
                     command.CommandText = "insert into printtemplate (content) values (@content)";
                 }
 
@@ -140,7 +171,7 @@ namespace Rings.Controllers
 
             return Json(new { message = "ok" }, "text/plain");
         }
-         
+
         public ActionResult QueryFieldNameByType(string fieldtype, int modelid)
         {
             var account = User.Identity.GetAccount();
@@ -177,6 +208,27 @@ namespace Rings.Controllers
             }
 
             return template;
+        }
+
+        public ActionResult DeletePrintTemplate(int id)
+        {
+            var account = User.Identity.GetAccount();
+            DataContext db = new DataContext(account.ApplicationId);
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(db.ConnectionString))
+            {
+                connection.Open();
+
+                NpgsqlCommand command = new NpgsqlCommand();
+                command.Connection = connection;
+
+                command.CommandText = "delete from printtemplate where id=" + id;
+                command.ExecuteNonQuery();
+
+                connection.Close();
+            }
+
+            return Json(new { message = "ok" });
         }
     }
 }

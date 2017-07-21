@@ -1,18 +1,26 @@
 ﻿using CsQuery;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web;
 
 namespace Rings.Models
 {
-    public class MenuLoader
+    public interface IMenuLoader
+    {
+        string RenderMenu();
+    }
+
+    public class MenuLoader : IMenuLoader
     {
         private string applicationid;
         private string language;
         private Account account;
+         
         public MenuLoader(Account account)
         {
             this.applicationid = account.ApplicationId;
@@ -186,5 +194,25 @@ namespace Rings.Models
         }
     }
 
+    public static class MenuLoaderFactory
+    {
+        public static IMenuLoader GetInstance(this Account account)
+        {
+            string key = ConfigurationManager.AppSettings["menuloader"];
+            if (string.IsNullOrEmpty(key))
+            {
+                return new MenuLoader(account);
+            }
 
+            AppSettingsReader reader = new AppSettingsReader();
+            string classname = reader.GetValue("menuloader", typeof(string)).ToString();
+
+            Type t = Type.GetType(classname);
+            ConstructorInfo ci = t.GetConstructor(new Type[] { typeof(Account) });
+
+            object instance = ci.Invoke(new object[] { account });
+
+            return instance as IMenuLoader;
+        }
+    }
 }

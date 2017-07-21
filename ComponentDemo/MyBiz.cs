@@ -13,7 +13,7 @@ namespace ComponentDemo
         [MyLog("业务方法1")]
         public object MyBizMethod1(string parameters)
         {
-            LimitLoader limitloader = new LimitLoader();
+            ILimitLoader limitloader = LimitLoaderFactory.GetInstance();
             limitloader.Load();
 
             var dic = JsonConvert.DeserializeObject<Dictionary<string, object>>(parameters);

@@ -8,10 +8,17 @@ using Npgsql;
 using Newtonsoft.Json;
 using System.Text;
 using CsQuery;
+using System.Configuration;
+using System.Reflection;
 
 namespace Rings.Models
 {
-    public class LimitLoader
+    public interface ILimitLoader
+    {
+        void Load();
+    }
+
+    public class LimitLoader:ILimitLoader
     {
         public void Load()
         {
@@ -136,6 +143,29 @@ namespace Rings.Models
             }
 
             return list;
+        }
+    }
+
+    public static class LimitLoaderFactory
+    {
+        public static ILimitLoader GetInstance()
+        {
+            string key = ConfigurationManager.AppSettings["limitloader"];
+            if (string.IsNullOrEmpty(key))
+            {
+                return new LimitLoader();
+            }
+
+            AppSettingsReader reader = new AppSettingsReader();
+            
+            string classname = reader.GetValue("limitloader", typeof(string)).ToString();
+
+            Type t = Type.GetType(classname);
+            ConstructorInfo ci = t.GetConstructor(new Type[] { });
+
+            object instance = ci.Invoke(new object[] { });
+
+            return instance as ILimitLoader;
         }
     }
 }

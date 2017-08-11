@@ -100,7 +100,7 @@
 
             var setmenuSelected = function () {
                 var domain = '@Url.Action("index","home",null,Request.Url.Scheme)';
-                var url = '@(Request.Url.OriginalString)';
+                var url = '@(Request.Url.ToString())';
                 if (domain == url) return;
                 var menus = $('nav#menu a');
                 var hasmatch = false;

@@ -18,8 +18,18 @@ namespace Rings.Controllers
 {
     public class AccountController : Controller
     {
-        public ActionResult Login(string lan)
+        public ActionResult Login(string lan, string c)
         {
+            if (!string.IsNullOrEmpty(c))
+            {
+                ViewBag.Company = c;
+            }
+
+            if (string.IsNullOrEmpty(lan))
+            {
+                lan = "zh-CN";
+            }
+
             ViewBag.Lan = lan;
 
             if (string.IsNullOrEmpty(lan) == false && lan.ToLower() != "zh-cn")

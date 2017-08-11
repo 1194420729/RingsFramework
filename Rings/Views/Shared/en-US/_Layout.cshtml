@@ -84,7 +84,7 @@
 
             $('nav#menu a').each(function () {
 
-                if ($(this).prop('href') === '@(Request.Url.OriginalString)') {
+                if ($(this).prop('href') === '@(Request.Url.ToString())') {
                     $(this).parent().addClass('Selected');
                 } else {
                     $(this).parent().removeClass('Selected');
